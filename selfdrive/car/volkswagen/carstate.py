@@ -16,6 +16,9 @@ class CarState(CarStateBase):
       self.get_can_parser = self.get_pq_can_parser
       self.get_cam_can_parser = self.get_pq_cam_can_parser
       self.update = self.update_pq
+      self.gsaHystActive = False   # gearshift assistant hysteris
+      self.gsaIntvActive = False   # gearshift assistant intervention
+      self.gsaSpeedFreeze = 0.0
       if CP.transmissionType == TRANS.automatic:
         self.shifter_values = can_define.dv["Getriebe_1"]['Waehlhebelposition__Getriebe_1_']
       if CP.enableGasInterceptor:
@@ -208,6 +211,7 @@ class CarState(CarStateBase):
     elif trans_type == TRANS.manual:
       ret.clutchPressed = not pt_cp.vl["Motor_1"]['Kupplungsschalter']
       reverse_light = bool(pt_cp.vl["Gate_Komf_1"]['GK1_Rueckfahr'])
+      self.engineRPM = pt_cp.vl["Motor_1"]['Motordrehzahl']  # engine RPM for gear shift assist
       if reverse_light:
         ret.gearShifter = GEAR.reverse
       else:
@@ -251,6 +255,29 @@ class CarState(CarStateBase):
     # Update ACC setpoint. When the setpoint reads as 255, the driver has not
     # yet established an ACC setpoint, so treat it as zero.
     ret.cruiseState.speed = pt_cp.vl["Motor_2"]['Soll_Geschwindigkeit_bei_GRA_Be'] * CV.KPH_TO_MS
+
+    # for manual cars only (gearshift assistant)
+    if trans_type == TRANS.manual:
+      # test RPM limit and prevent change as long as in hysteresis
+      if self.engineRPM > 2500.0 and not self.gsaHystActive:
+        self.gsaSpeedFreeze = ret.vEgo
+        self.gsaHystActive = True
+      # within hysteresis band -> set RPM intervention active
+      if self.gsaHystActive:
+        self.gsaIntvActive = True
+      else:
+        self.gsaIntvActive = False
+      # handle hysteresis flag
+      if self.engineRPM < 2200.0:
+        self.gsaHystActive = False
+
+      # assign desired values to generate desired speed (depending on driving situation)
+      if ret.clutchPressed:                                           # during clutch open do not try to accelerate
+        ret.cruiseState.speed = min(ret.vEgo, ret.cruiseState.speed)  # -> neutral speed setpoint but do not increase
+                                                                      #    (to not prevent braking with clutch open)
+      elif self.gsaIntvActive:
+        ret.cruiseState.speed = self.gsaSpeedFreeze                   # limit RPM by using frozen speed
+
     if ret.cruiseState.speed > 70:  # 255 kph in m/s == no current setpoint
       ret.cruiseState.speed = 0
 
@@ -453,7 +480,9 @@ class CarState(CarStateBase):
       checks += [("Getriebe_1", 100)]  # From J743 Auto transmission control module
     elif CP.transmissionType == TRANS.manual:
       signals += [("Kupplungsschalter", "Motor_1", 0),  # Clutch switch
-                  ("GK1_Rueckfahr", "Gate_Komf_1", 0)]  # Reverse light from BCM
+                  ("GK1_Rueckfahr", "Gate_Komf_1", 0),  # Reverse light from BCM
+                  ("Motordrehzahl", "Motor_1", 0),      # engine RPM
+                 ]
       checks += [("Motor_1", 100)]  # From J623 Engine control module
 
     if CP.networkLocation == NWL.fwdCamera:
