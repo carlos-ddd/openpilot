@@ -212,6 +212,8 @@ class CarState(CarStateBase):
       ret.clutchPressed = not pt_cp.vl["Motor_1"]['Kupplungsschalter']
       reverse_light = bool(pt_cp.vl["Gate_Komf_1"]['GK1_Rueckfahr'])
       self.engineRPM = pt_cp.vl["Motor_1"]['Motordrehzahl']  # engine RPM for gear shift assist
+#      self.gearDesired = pt_cp.vl["Getriebe_2"]['eingelegte_Fahrstufe']                 # gear ECU wants                  # 2do: needs to be added to signals / checks
+#      self.gearCurrent = pt_cp.vl["Getriebe_2"]['Ganganzeige_Kombi___Getriebe_Va']      # gear ECU detected  
       if reverse_light:
         ret.gearShifter = GEAR.reverse
       else:
@@ -258,8 +260,16 @@ class CarState(CarStateBase):
 
     # for manual cars only (gearshift assistant)
     if trans_type == TRANS.manual:
+      # get car's gearshift advice   
+#      if (0 < self.gearDesired < 7) and (0 < self.gearCurrent < 7):                     # 0 = gear not detected
+#        self.gearAdvice = self.gearDesired - self.gearCurrent
+#        self.gearAdviceValid = True
+#      else:
+#        self.gearAdvice = 0
+#        self.gearAdviceValid = False
+
       # test RPM limit and prevent change as long as in hysteresis
-      if self.engineRPM > 2500.0 and not self.gsaHystActive:
+      if self.engineRPM > 2500.0 and not self.gsaHystActive:    
         self.gsaSpeedFreeze = ret.vEgo
         self.gsaHystActive = True
       # within hysteresis band -> set RPM intervention active
@@ -268,15 +278,18 @@ class CarState(CarStateBase):
       else:
         self.gsaIntvActive = False
       # handle hysteresis flag
-      if self.engineRPM < 2200.0:
+      if self.engineRPM < 2200.0:   # or self.gearAdvice < 0
         self.gsaHystActive = False
 
-      # assign desired values to generate desired speed (depending on driving situation)
+      # assign desired values to generate desired set-speed (depending on driving situation)
       if ret.clutchPressed:                                           # during clutch open do not try to accelerate
         ret.cruiseState.speed = min(ret.vEgo, ret.cruiseState.speed)  # -> neutral speed setpoint but do not increase
                                                                       #    (to not prevent braking with clutch open)
-      elif self.gsaIntvActive:
+      # apply limit when >RPM limit # + car advises to shift up
+      # in last gear, no shift up advice is sent by ECU -> do not limit
+      elif self.gsaIntvActive:      # and self.gearAdvice > 0  and self.gearAdviceValid     # >RPM limit + no shift up advice -> last gear
         ret.cruiseState.speed = self.gsaSpeedFreeze                   # limit RPM by using frozen speed
+                                                                      
 
     if ret.cruiseState.speed > 70:  # 255 kph in m/s == no current setpoint
       ret.cruiseState.speed = 0
