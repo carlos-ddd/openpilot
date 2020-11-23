@@ -160,13 +160,13 @@ class CarController():
 
       # --------------------------------------------------------------------------
       #                                                                         #
-      # Prepare PQ_MOB for sending the braking message                          #
+      # Prepare PQ_AWV for sending the braking message                          #
       #                                                                         #
       #                                                                         #
       # --------------------------------------------------------------------------
       if (frame % P.AWV_STEP == 0) and CS.CP.enableGasInterceptor:
-        green_led = 1 if enabled else 0
-        orange_led = 1 if self.mobPreEnable and self.mobEnabled else 0
+        green_led = 1 if enabled and (CS.ABSWorking == 0) else 0        # carlos-ddd -> green only on if brake will work
+        orange_led = 1 if self.mobPreEnable and self.mobEnabled else 0  # orange when braking is requested
         if enabled:
           braking_working = 0 if (CS.ABSWorking == 0) else 5
         else:
