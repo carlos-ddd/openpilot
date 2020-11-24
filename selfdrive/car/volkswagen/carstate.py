@@ -213,7 +213,7 @@ class CarState(CarStateBase):
       reverse_light = bool(pt_cp.vl["Gate_Komf_1"]['GK1_Rueckfahr'])
       self.engineRPM = pt_cp.vl["Motor_1"]['Motordrehzahl']  # engine RPM for gear shift assist
 #      self.gearDesired = pt_cp.vl["Getriebe_2"]['eingelegte_Fahrstufe']                 # gear ECU wants                  # 2do: needs to be added to signals / checks
-#      self.gearCurrent = pt_cp.vl["Getriebe_2"]['Ganganzeige_Kombi___Getriebe_Va']      # gear ECU detected  
+#      self.gearCurrent = pt_cp.vl["Getriebe_2"]['Ganganzeige_Kombi___Getriebe_Va']      # gear ECU detected
       if reverse_light:
         ret.gearShifter = GEAR.reverse
       else:
@@ -260,7 +260,7 @@ class CarState(CarStateBase):
 
     # for manual cars only (gearshift assistant)
     if trans_type == TRANS.manual:
-      # get car's gearshift advice   
+      # get car's gearshift advice
 #      if (0 < self.gearDesired < 7) and (0 < self.gearCurrent < 7):                     # 0 = gear not detected
 #        self.gearAdvice = self.gearDesired - self.gearCurrent
 #        self.gearAdviceValid = True
@@ -269,7 +269,7 @@ class CarState(CarStateBase):
 #        self.gearAdviceValid = False
 
       # test RPM limit and prevent change as long as in hysteresis
-      if self.engineRPM > 2500.0 and not self.gsaHystActive:    
+      if self.engineRPM > 2500.0 and not self.gsaHystActive:
         self.gsaSpeedFreeze = ret.vEgo
         self.gsaHystActive = True
       # within hysteresis band -> set RPM intervention active
@@ -289,18 +289,21 @@ class CarState(CarStateBase):
       # in last gear, no shift up advice is sent by ECU -> do not limit
       elif self.gsaIntvActive:      # and self.gearAdvice > 0  and self.gearAdviceValid     # >RPM limit + no shift up advice -> last gear
         ret.cruiseState.speed = self.gsaSpeedFreeze                   # limit RPM by using frozen speed
-                                                                      
+
 
     if ret.cruiseState.speed > 70:  # 255 kph in m/s == no current setpoint
       ret.cruiseState.speed = 0
 
     # Update control button states for turn signals and ACC controls.
-    self.buttonStates["accelCruise"] = bool(pt_cp.vl["GRA_Neu"]['GRA_Up_kurz']) or bool(pt_cp.vl["GRA_Neu"]['GRA_Up_lang'])
-    self.buttonStates["decelCruise"] = bool(pt_cp.vl["GRA_Neu"]['GRA_Down_kurz']) or bool(pt_cp.vl["GRA_Neu"]['GRA_Down_lang'])
+    self.buttonStates["accelCruise"] = bool(pt_cp.vl["GRA_Neu"]['GRA_Up_kurz'])
+    self.buttonStates["decelCruise"] = bool(pt_cp.vl["GRA_Neu"]['GRA_Down_kurz'])
     self.buttonStates["cancel"] = bool(pt_cp.vl["GRA_Neu"]['GRA_Abbrechen'])
     self.buttonStates["setCruise"] = bool(pt_cp.vl["GRA_Neu"]['GRA_Neu_Setzen'])
     self.buttonStates["resumeCruise"] = bool(pt_cp.vl["GRA_Neu"]['GRA_Recall'])
     self.buttonStates["gapAdjustCruise"] = bool(pt_cp.vl["GRA_Neu"]['GRA_Zeitluecke'])
+    self.buttonStates["tipUp"] = bool(pt_cp.vl["GRA_Neu"]['GRA_Up_lang'])
+    self.buttonStates["tipDown"] = bool(pt_cp.vl["GRA_Neu"]['GRA_Down_lang'])
+
     ret.leftBlinker = bool(pt_cp.vl["Gate_Komf_1"]['GK1_Blinker_li'])
     ret.rightBlinker = bool(pt_cp.vl["Gate_Komf_1"]['GK1_Blinker_re'])
 
