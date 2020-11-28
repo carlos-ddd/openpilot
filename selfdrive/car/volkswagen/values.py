@@ -39,8 +39,8 @@ BUTTON_STATES = {
   "setCruise": False,
   "resumeCruise": False,
   "gapAdjustCruise": False,
-  "tipUp" : False,
-  "tipDown" : False
+  "longUp" : False,
+  "longDown" : False
 }
 
 MQB_LDW_MESSAGES = {
