@@ -1,3 +1,5 @@
+import struct
+from ctypes import create_string_buffer
 from selfdrive.car import crc8_pedal
 # ----------------------------------------------------------------------- #
 #                                                                         #
@@ -154,4 +156,16 @@ def create_pq_acc_buttons_control(packer, bus, buttonStatesToSend, CS, idx):
   dat = packer.make_can_msg("GRA_Neu", bus, values)[2]
   values["GRA_Checksum"] = dat[1] ^ dat[2] ^ dat[3]
   return packer.make_can_msg("GRA_Neu", bus, values)
+
+def create_radar_VIN_msg(id,radarVIN,radarCAN,radarTriggerMessage,useRadar,radarPosition,radarEpasType):
+  msg_id = 0x560
+  msg_len = 8
+  msg = create_string_buffer(msg_len)
+  if id == 0:
+    struct.pack_into('BBBBBBBB', msg, 0, id,radarCAN,useRadar + (radarPosition << 1) + (radarEpasType << 3), ((radarTriggerMessage >> 8) & 0xFF),(radarTriggerMessage & 0xFF),ord(radarVIN[0]),ord(radarVIN[1]),ord(radarVIN[2]))
+  if id == 1:
+    struct.pack_into('BBBBBBBB', msg, 0, id,ord(radarVIN[3]),ord(radarVIN[4]),ord(radarVIN[5]),ord(radarVIN[6]),ord(radarVIN[7]),ord(radarVIN[8]),ord(radarVIN[9]))
+  if id == 2:
+    struct.pack_into('BBBBBBBB', msg, 0, id,ord(radarVIN[10]),ord(radarVIN[11]),ord(radarVIN[12]),ord(radarVIN[13]),ord(radarVIN[14]),ord(radarVIN[15]),ord(radarVIN[16]))
+  return [msg_id, 2, msg.raw, 0]
 

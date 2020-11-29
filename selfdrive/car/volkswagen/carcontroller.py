@@ -11,6 +11,7 @@ class CarController():
     self.apply_steer_last = 0
     self.mobPreEnable = False
     self.mobEnabled = False
+    self.radarVin_idx = 0
 
     self.packer_pt = CANPacker(DBC[CP.carFingerprint]['pt'])
     self.acc_bus = CANBUS.pt if CP.networkLocation == NWL.fwdCamera else CANBUS.cam
@@ -190,6 +191,20 @@ class CarController():
 
       can_sends.append(self.create_gas_control(self.packer_pt, CANBUS.cam, apply_gas, frame // 2))
 
+    # --------------------------------------------------------------------------
+    #                                                                         #
+    # Prepare VIN_MESSAGE for sending towards Panda                           #
+    #                                                                         #
+    #                                                                         #
+    # --------------------------------------------------------------------------
+    # if using radar, we need to send the VIN
+    if CS.useTeslaRadar and (frame % 100 == 0):
+      can_sends.append(
+        volkswagencan.create_radar_VIN_msg(self.radarVin_idx, CS.radarVIN, 2, 0x4A0, CS.useTeslaRadar,
+                                            CS.radarPosition,
+                                            CS.radarEpasType))
+      self.radarVin_idx += 1
+      self.radarVin_idx = self.radarVin_idx % 3
 
     #--------------------------------------------------------------------------
     #                                                                         #

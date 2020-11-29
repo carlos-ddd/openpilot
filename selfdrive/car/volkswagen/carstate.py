@@ -11,6 +11,15 @@ class CarState(CarStateBase):
     super().__init__(CP)
     can_define = CANDefine(DBC[CP.carFingerprint]['pt'])
 
+    ### START OF MAIN CONFIG OPTIONS ###
+    ### Do NOT modify here, modify in /data/bb_openpilot.cfg and reboot
+    self.useTeslaRadar = CP.enableGasInterceptor
+    self.radarVIN = "5YJSB7E17HF207544" # carlos_ddd's radar
+    self.radarOffset = 0.
+    self.radarPosition = 2
+    self.radarEpasType = 3
+    ### END OF MAIN CONFIG OPTIONS ###
+
     if CP.safetyModel == car.CarParams.SafetyModel.volkswagenPq:
       # Configure for PQ35/PQ46/NMS network messaging
       self.get_can_parser = self.get_pq_can_parser

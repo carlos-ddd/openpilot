@@ -27,7 +27,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.enableCamera = True  # Stock camera detection doesn't apply to VW
     ret.carName = "volkswagen"
-    ret.radarOffCan = True
+    ret.radarOffCan = False
 
     # Common default parameters that may be overridden per-vehicle
     ret.steerRateCost = 1.0
@@ -93,9 +93,9 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalTuning.deadzoneBP = [0.]
       ret.longitudinalTuning.deadzoneV = [0.]
       ret.longitudinalTuning.kpBP = [0.]
-      ret.longitudinalTuning.kpV = [1.15]
+      ret.longitudinalTuning.kpV = [0.95]
       ret.longitudinalTuning.kiBP = [0.]
-      ret.longitudinalTuning.kiV = [0.28]
+      ret.longitudinalTuning.kiV = [0.12]
 
       # PQ lateral tuning HCA_Status 7
       ret.lateralTuning.pid.kpBP = [0., 14., 35.]
