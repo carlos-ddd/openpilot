@@ -161,12 +161,12 @@ class CarController():
 
       # --------------------------------------------------------------------------
       #                                                                         #
-      # Prepare PQ_MOB for sending the braking message                          #
+      # Prepare PQ_AWV for sending the braking message                          #
       #                                                                         #
       #                                                                         #
       # --------------------------------------------------------------------------
       if (frame % P.AWV_STEP == 0) and CS.CP.enableGasInterceptor:
-        green_led = 1 if enabled else 0
+        green_led = 1 if enabled and (CS.ABSWorking == 0) else 0
         orange_led = 1 if self.mobPreEnable and self.mobEnabled else 0
         if enabled:
           braking_working = 0 if (CS.ABSWorking == 0) else 5
@@ -186,7 +186,7 @@ class CarController():
     # --------------------------------------------------------------------------
     if (frame % P.GAS_STEP == 0) and CS.CP.enableGasInterceptor:
       apply_gas = 0
-      if enabled:
+      if enabled and not CS.out.clutchPressed:
         apply_gas = clip(actuators.gas, 0., 1.)
 
       can_sends.append(self.create_gas_control(self.packer_pt, CANBUS.cam, apply_gas, frame // 2))

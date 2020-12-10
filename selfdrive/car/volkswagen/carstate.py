@@ -14,7 +14,7 @@ class CarState(CarStateBase):
     ### START OF MAIN CONFIG OPTIONS ###
     ### Do NOT modify here, modify in /data/bb_openpilot.cfg and reboot
     self.useTeslaRadar = CP.enableGasInterceptor
-    self.radarVIN = "5YJXCCE40HF060571"
+    self.radarVIN = "5YJSB7E17HF207544" # carlos_ddd
     self.radarOffset = 0.
     self.radarPosition = 2
     self.radarEpasType = 3
@@ -25,6 +25,9 @@ class CarState(CarStateBase):
       self.get_can_parser = self.get_pq_can_parser
       self.get_cam_can_parser = self.get_pq_cam_can_parser
       self.update = self.update_pq
+      self.gsaHystActive = False   # gearshift assistant hysteris
+      self.gsaIntvActive = False   # gearshift assistant intervention
+      self.gsaSpeedFreeze = 0.0
       if CP.transmissionType == TRANS.automatic:
         self.shifter_values = can_define.dv["Getriebe_1"]['Waehlhebelposition__Getriebe_1_']
       if CP.enableGasInterceptor:
@@ -221,6 +224,9 @@ class CarState(CarStateBase):
         ret.gearShifter = GEAR.reverse
       else:
         ret.gearShifter = GEAR.drive
+      self.engineRPM = pt_cp.vl["Motor_1"]['Motordrehzahl']  # engine RPM for gear shift assist
+#      self.gearDesired = pt_cp.vl["Getriebe_2"]['eingelegte_Fahrstufe']                 # gear ECU wants                  # 2do: needs to be added to signals / checks
+#      self.gearCurrent = pt_cp.vl["Getriebe_2"]['Ganganzeige_Kombi___Getriebe_Va']      # gear ECU detected
 
     # Update door and trunk/hatch lid open status.
     # TODO: need to locate signals for other three doors if possible
@@ -260,6 +266,39 @@ class CarState(CarStateBase):
     # Update ACC setpoint. When the setpoint reads as 255, the driver has not
     # yet established an ACC setpoint, so treat it as zero.
     ret.cruiseState.speed = pt_cp.vl["Motor_2"]['Soll_Geschwindigkeit_bei_GRA_Be'] * CV.KPH_TO_MS
+
+    # for manual cars only (gearshift assistant)
+    if trans_type == TRANS.manual:
+      # get car's gearshift advice
+#      if (0 < self.gearDesired < 7) and (0 < self.gearCurrent < 7):                     # 0 = gear not detected
+#        self.gearAdvice = self.gearDesired - self.gearCurrent
+#        self.gearAdviceValid = True
+#      else:
+#        self.gearAdvice = 0
+#        self.gearAdviceValid = False
+
+      # test RPM limit and prevent change as long as in hysteresis
+      if self.engineRPM > 2500.0 and not self.gsaHystActive:
+        self.gsaSpeedFreeze = ret.vEgo
+        self.gsaHystActive = True
+      # within hysteresis band -> set RPM intervention active
+      if self.gsaHystActive:
+        self.gsaIntvActive = True
+      else:
+        self.gsaIntvActive = False
+      # handle hysteresis flag
+      if self.engineRPM < 2200.0:   # or self.gearAdvice < 0
+        self.gsaHystActive = False
+
+      # assign desired values to generate desired set-speed (depending on driving situation)
+      if ret.clutchPressed:                                           # during clutch open do not try to accelerate
+        ret.cruiseState.speed = min(ret.vEgo, ret.cruiseState.speed)  # -> neutral speed setpoint but do not increase
+                                                                      #    (to not prevent braking with clutch open)
+      # apply limit when >RPM limit # + car advises to shift up
+      # in last gear, no shift up advice is sent by ECU -> do not limit
+      elif self.gsaIntvActive:      # and self.gearAdvice > 0  and self.gearAdviceValid     # >RPM limit + no shift up advice -> last gear
+        ret.cruiseState.speed = self.gsaSpeedFreeze                   # limit RPM by using frozen speed
+
     if ret.cruiseState.speed > 70:  # 255 kph in m/s == no current setpoint
       ret.cruiseState.speed = 0
 
@@ -462,7 +501,9 @@ class CarState(CarStateBase):
       checks += [("Getriebe_1", 100)]  # From J743 Auto transmission control module
     elif CP.transmissionType == TRANS.manual:
       signals += [("Kupplungsschalter", "Motor_1", 0),  # Clutch switch
-                  ("GK1_Rueckfahr", "Gate_Komf_1", 0)]  # Reverse light from BCM
+                  ("GK1_Rueckfahr", "Gate_Komf_1", 0),  # Reverse light from BCM
+                  ("Motordrehzahl", "Motor_1", 0),      # engine RPM
+                  ]
       checks += [("Motor_1", 100)]  # From J623 Engine control module
 
     if CP.networkLocation == NWL.fwdCamera:
