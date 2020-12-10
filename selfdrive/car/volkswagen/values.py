@@ -32,13 +32,24 @@ NWL = car.CarParams.NetworkLocation
 TRANS = car.CarParams.TransmissionType
 GEAR = car.CarState.GearShifter
 
+#BUTTON_STATES = {
+#  "accelCruise": False,
+#  "decelCruise": False,
+#  "cancel": False,
+#  "setCruise": False,
+#  "resumeCruise": False,
+#  "gapAdjustCruise": False
+#}
+
 BUTTON_STATES = {
   "accelCruise": False,
   "decelCruise": False,
   "cancel": False,
   "setCruise": False,
   "resumeCruise": False,
-  "gapAdjustCruise": False
+  "gapAdjustCruise": False,
+  "longUp" : False,
+  "longDown" : False
 }
 
 MQB_LDW_MESSAGES = {
