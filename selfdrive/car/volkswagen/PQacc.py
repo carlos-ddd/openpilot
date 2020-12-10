@@ -1,19 +1,21 @@
 import numpy
 import math
 
+from selfdrive.car.volkswagen.values import BUTTON_STATES
+
 class PQacc():
     """
     """
-    BUTTON_STATES = {
-      "accelCruise": False,
-      "decelCruise": False,
-      "cancel": False,
-      "setCruise": False,
-      "resumeCruise": False,
-      "gapAdjustCruise": False,
-      "longUp" : False,
-      "longDown" : False
-    }
+#    BUTTON_STATES = {
+#      "accelCruise": False,
+#      "decelCruise": False,
+#      "cancel": False,
+#      "setCruise": False,
+#      "resumeCruise": False,
+#      "gapAdjustCruise": False,
+#      "longUp" : False,
+#      "longDown" : False
+#    }
 
     BUTTON_ACTIONS = {
             "undefined" : "?",
@@ -37,8 +39,8 @@ class PQacc():
         self.longCtrl_coast = False
         self.v_mem = float('NaN')
         self.dist = 0
-        self.buttonStatesOld = self.BUTTON_STATES.copy()
-        self.buttonActionsOld = self.BUTTON_STATES.copy()
+        self.buttonStatesOld = BUTTON_STATES.copy()
+        self.buttonActionsOld = BUTTON_STATES.copy()
         self.v_disp = float('NaN')
         self.op_engagedOld = False
 
@@ -102,7 +104,7 @@ class PQacc():
         '''
         button states to button actions
         '''
-        btnAct = self.BUTTON_STATES.copy()                          # return
+        btnAct = BUTTON_STATES.copy()                          # return
         for key, val in btnSta_new.items():
             if val == True and btnSta_old[key] == False:
                 btnAct[key] = self.BUTTON_ACTIONS['rising']
