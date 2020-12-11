@@ -122,6 +122,10 @@ class PQacc():
         takes button actions and dispatches them to the appropriate handling functions
         - priority is first decided here by if-elseif-else
         '''
+
+        if numpy.isnan(v_Ego) or v_Ego<0:
+            v_Ego = 0.
+
         if GRA_Haupt:
             if op_disengageTrg:
                 self._regular_disengage()
