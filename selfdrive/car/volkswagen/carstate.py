@@ -263,13 +263,13 @@ class CarState(CarStateBase):
     # FIXME: This is unfinished and not fully correct, need to improve further
     ret.cruiseState.available = bool(pt_cp.vl["GRA_Neu"]['GRA_Hauptschalt'])
     
-    ACC_engaged, v_ACC = self.ACC.update_acc_iter_4CS(ret.vEgo*CV.MS_TO_KPH, self.buttonStates, ret.cruiseState.available, self.openpilot_enabled)
-    ret.cruiseState.enabled = ACC_engaged
+    self.ACC_engaged, self.v_ACC = self.ACC.update_acc_iter_4CS(ret.vEgo*CV.MS_TO_KPH, self.buttonStates, ret.cruiseState.available, self.openpilot_enabled)
+    ret.cruiseState.enabled = self.ACC_engaged
     #ret.cruiseState.enabled = True if pt_cp.vl["Motor_2"]['GRA_Status'] in [1, 2] else False
 
     # Set override flag for openpilot enabled state.
     #if self.CP.enableGasInterceptor and pt_cp.vl["Motor_2"]['GRA_Status'] in [1, 2]:
-    if self.CP.enableGasInterceptor and ACC_engaged:
+    if self.CP.enableGasInterceptor and self.ACC_engaged:
       self.openpilot_enabled = True
 
     # Check if Gas or Brake pressed and cancel override
@@ -282,7 +282,7 @@ class CarState(CarStateBase):
 
     # Update ACC setpoint. When the setpoint reads as 255, the driver has not
     # yet established an ACC setpoint, so treat it as zero.
-    ret.cruiseState.speed = v_ACC * CV.KPH_TO_MS
+    ret.cruiseState.speed = self.v_ACC * CV.KPH_TO_MS
     #ret.cruiseState.speed = pt_cp.vl["Motor_2"]['Soll_Geschwindigkeit_bei_GRA_Be'] * CV.KPH_TO_MS
 
     # for manual cars only (gearshift assistant)
