@@ -1,9 +1,6 @@
 [submodule "panda"]
 	path = panda
 	url = ../../CineXWorm/panda.git
-[submodule "opendbc"]
-	path = opendbc
-	url = ../../CineXWorm/opendbc.git
 [submodule "laika_repo"]
 	path = laika_repo
 	url = ../../commaai/laika.git
