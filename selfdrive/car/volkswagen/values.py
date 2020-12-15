@@ -32,15 +32,6 @@ NWL = car.CarParams.NetworkLocation
 TRANS = car.CarParams.TransmissionType
 GEAR = car.CarState.GearShifter
 
-#BUTTON_STATES = {
-#  "accelCruise": False,
-#  "decelCruise": False,
-#  "cancel": False,
-#  "setCruise": False,
-#  "resumeCruise": False,
-#  "gapAdjustCruise": False
-#}
-
 BUTTON_STATES = {
   "accelCruise": False,
   "decelCruise": False,
@@ -62,6 +53,21 @@ MQB_LDW_MESSAGES = {
   "laneAssistTakeOverSilent": 8,        # "Lane Assist: Please Take Over Steering" silent
   "emergencyAssistChangingLanes": 9,    # "Emergency Assist: Changing lanes..." with urgent beep
   "laneAssistDeactivated": 10,          # "Lane Assist deactivated." silent with persistent icon afterward
+}
+
+PQ_LDW_MESSAGES = {
+  "none": 0,                            # Nothing to display
+  "laneAssistUnavail": 1,               # "Lane Assist currently not available."
+  "laneAssistUnavailSysError": 2,       # "Lane Assist system error"
+  "laneAssistUnavailNoSensor": 3,       # "Lane Assist not available. No sensor view."
+  "laneAssistTakeOverSilent": 4,        # "Lane Assist: Please Take Over Steering"
+  "laneAssistDeactivTrailer": 5,        # "Lane Assist: no function with trailer"
+}
+
+PQ_LDW_SOUND = {
+  "none": 0,                            # silent
+  "info_chime": 1,                      
+  "warn_chime": 2,                     
 }
 
 class CAR:

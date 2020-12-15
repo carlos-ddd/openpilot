@@ -161,7 +161,7 @@ class CarController():
 
       # --------------------------------------------------------------------------
       #                                                                         #
-      # Prepare PQ_AWV for sending the braking message                          #
+      # Prepare PQ_AWV for Front Assist LED and Front Assist Text               #
       #                                                                         #
       #                                                                         #
       # --------------------------------------------------------------------------
@@ -253,7 +253,8 @@ class CarController():
         # A subset of MQBs like to "creep" too aggressively with this implementation.
         self.graButtonStatesToSend = BUTTON_STATES.copy()
         self.graButtonStatesToSend["resumeCruise"] = True
-      elif enabled and CS.out.cruiseState.enabled and CS.CP.enableGasInterceptor:
+      # car's stock cruise control needs to be cancelled if it is active
+      elif enabled and CS.out.GRAactive and CS.CP.enableGasInterceptor:
         self.graButtonStatesToSend = BUTTON_STATES.copy()
         self.graButtonStatesToSend["cancel"] = True
 

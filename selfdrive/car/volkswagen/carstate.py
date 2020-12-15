@@ -260,30 +260,29 @@ class CarState(CarStateBase):
     self.buttonStates["longDown"] = bool(pt_cp.vl["GRA_Neu"]['GRA_Down_lang'])
 
     # Update ACC radar status.
-    # FIXME: This is unfinished and not fully correct, need to improve further
     ret.cruiseState.available = bool(pt_cp.vl["GRA_Neu"]['GRA_Hauptschalt'])
+    ret.GRAactive = True if pt_cp.vl["Motor_2"]['GRA_Status'] in [1, 2] else False
     
+    # ACC emulation
     self.ACC_engaged, self.v_ACC = self.ACC.update_acc_iter_4CS(ret.vEgo*CV.MS_TO_KPH, self.buttonStates, ret.cruiseState.available, self.openpilot_enabled)
-    ret.cruiseState.enabled = self.ACC_engaged
-    #ret.cruiseState.enabled = True if pt_cp.vl["Motor_2"]['GRA_Status'] in [1, 2] else False
 
-    # Set override flag for openpilot enabled state.
-    #if self.CP.enableGasInterceptor and pt_cp.vl["Motor_2"]['GRA_Status'] in [1, 2]:
+    # Engage open pilot if ACC emulation says so
     if self.CP.enableGasInterceptor and self.ACC_engaged:
       self.openpilot_enabled = True
+    else:
+      self.openpilot_enabled = False
 
-    # Check if Gas or Brake pressed and cancel override
+    # Check if Gas or Brake pressed and override ACC emulation
     if self.CP.enableGasInterceptor and (ret.gasPressed or ret.brakePressed):
       self.openpilot_enabled = False
 
     # Override openpilot enabled if gas interceptor installed
     if self.CP.enableGasInterceptor and self.openpilot_enabled:
       ret.cruiseState.enabled = True
+    else:
+      ret.cruiseState.enabled = False
 
-    # Update ACC setpoint. When the setpoint reads as 255, the driver has not
-    # yet established an ACC setpoint, so treat it as zero.
     ret.cruiseState.speed = self.v_ACC * CV.KPH_TO_MS
-    #ret.cruiseState.speed = pt_cp.vl["Motor_2"]['Soll_Geschwindigkeit_bei_GRA_Be'] * CV.KPH_TO_MS
 
     # for manual cars only (gearshift assistant)
     if trans_type == TRANS.manual:
