@@ -19,7 +19,7 @@ class CarState(CarStateBase):
     self.useTeslaRadar = CP.enableGasInterceptor
     self.radarVIN = "5YJSB7E17HF207544" # carlos_ddd
     self.radarOffset = 0.
-    self.radarPosition = 2
+    self.radarPosition = 1
     self.radarEpasType = 3
     ### END OF MAIN CONFIG OPTIONS ###
 
