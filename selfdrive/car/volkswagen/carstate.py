@@ -261,7 +261,7 @@ class CarState(CarStateBase):
 
     # Update ACC radar status.
     ret.cruiseState.available = bool(pt_cp.vl["GRA_Neu"]['GRA_Hauptschalt'])
-    ret.GRAactive = True if pt_cp.vl["Motor_2"]['GRA_Status'] in [1, 2] else False
+    ret.graActive = True if pt_cp.vl["Motor_2"]['GRA_Status'] in [1, 2] else False
     
     # ACC emulation
     self.ACC_engaged, self.v_ACC = self.ACC.update_acc_iter_4CS(ret.vEgo*CV.MS_TO_KPH, self.buttonStates, ret.cruiseState.available, self.openpilot_enabled)

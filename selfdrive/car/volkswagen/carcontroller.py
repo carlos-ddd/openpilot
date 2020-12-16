@@ -254,7 +254,7 @@ class CarController():
         self.graButtonStatesToSend = BUTTON_STATES.copy()
         self.graButtonStatesToSend["resumeCruise"] = True
       # car's stock cruise control needs to be cancelled if it is active
-      elif enabled and CS.out.GRAactive and CS.CP.enableGasInterceptor:
+      elif enabled and CS.out.graActive and CS.CP.enableGasInterceptor:
         self.graButtonStatesToSend = BUTTON_STATES.copy()
         self.graButtonStatesToSend["cancel"] = True
 
