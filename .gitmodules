@@ -1,15 +1,15 @@
 [submodule "panda"]
 	path = panda
-	url = ../../CineXWorm/panda.git
+	url = ../../carlos-ddd/panda.git
 [submodule "opendbc"]
 	path = opendbc
-	url = ../../CineXWorm/opendbc.git
+	url = https://github.com/carlos-ddd/opendbc
 [submodule "laika_repo"]
 	path = laika_repo
 	url = ../../commaai/laika.git
 [submodule "cereal"]
 	path = cereal
-	url = ../../CineXWorm/cereal.git
+	url = ../../carlos-ddd/cereal.git
 [submodule "rednose_repo"]
 	path = rednose_repo
 	url = ../../commaai/rednose.git
