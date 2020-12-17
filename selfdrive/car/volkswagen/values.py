@@ -59,8 +59,8 @@ PQ_LDW_MESSAGES = {
   "none": 0,                            # Nothing to display
   "laneAssistUnavail": 1,               # "Lane Assist currently not available."
   "laneAssistUnavailSysError": 2,       # "Lane Assist system error"
-  "laneAssistUnavailNoSensor": 3,       # "Lane Assist not available. No sensor view."
-  "laneAssistTakeOverSilent": 4,        # "Lane Assist: Please Take Over Steering"
+  "laneAssistUnavailNoSensorView": 3,   # "Lane Assist not available. No sensor view."
+  "laneAssistTakeOver": 4,              # "Lane Assist: Please Take Over Steering"
   "laneAssistDeactivTrailer": 5,        # "Lane Assist: no function with trailer"
 }
 
