@@ -13,7 +13,7 @@ class CarController():
     self.mobEnabled = False
     self.radarVin_idx = 0
 
-    #self.graCancleCnt = 0
+    self.graCancleCnt = 0
 
     self.packer_pt = CANPacker(DBC[CP.carFingerprint]['pt'])
     self.acc_bus = CANBUS.pt if CP.networkLocation == NWL.fwdCamera else CANBUS.cam
@@ -256,16 +256,15 @@ class CarController():
         self.graButtonStatesToSend = BUTTON_STATES.copy()
         self.graButtonStatesToSend["resumeCruise"] = True
       # car's stock cruise control needs to be cancelled if it is active
-      #elif enabled and CS.out.graActive and self.graCancleCnt<=4 and CS.CP.enableGasInterceptor:
-      elif enabled and CS.out.graActive and CS.CP.enableGasInterceptor:
+      elif enabled and CS.out.graActive and self.graCancleCnt<=4 and CS.CP.enableGasInterceptor:
         self.graButtonStatesToSend = BUTTON_STATES.copy()
         self.graButtonStatesToSend["cancel"] = True
 
 
       # GRA cancelling
-     # self.graCancleCnt += 1
-     # if self.graCancleCnt >= 15 or not CS.out.graActive:
-     #   slef.graCancleCnt = 0
+      self.graCancleCnt += 1
+      if self.graCancleCnt >= 15 or not CS.out.graActive:
+        self.graCancleCnt = 0
 
 
     # OP/Panda can see this message but can't filter it when integrated at the
