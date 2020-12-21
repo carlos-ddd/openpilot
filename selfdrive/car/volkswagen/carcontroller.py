@@ -2,7 +2,7 @@ from cereal import car
 from common.numpy_fast import clip
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.volkswagen import volkswagencan
-from selfdrive.car.volkswagen.values import DBC, CANBUS, NWL, MQB_LDW_MESSAGES, BUTTON_STATES, CarControllerParams
+from selfdrive.car.volkswagen.values import DBC, CANBUS, NWL, MQB_LDW_MESSAGES, BUTTON_STATES, CarControllerParams, PQ_LDW_MESSAGES
 from opendbc.can.packer import CANPacker
 
 
