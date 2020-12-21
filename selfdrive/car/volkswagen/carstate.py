@@ -269,6 +269,9 @@ class CarState(CarStateBase):
     # Engage open pilot if ACC emulation says so
     if self.CP.enableGasInterceptor and self.ACC_engaged:
       self.openpilot_enabled = True
+    # if ACC emulation is not active we want OP still engaged but setspeed <= current speed
+    elif self.CP.enableGasInterceptor and not self.ACC_engaged:
+      self.v_ACC = ret.vEgo * CV.MS_TO_KPH
     else:
       self.openpilot_enabled = False
 
