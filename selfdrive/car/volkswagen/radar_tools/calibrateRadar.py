@@ -12,8 +12,8 @@ from opendbc.can.parser import CANParser
 from common.realtime import sec_since_boot
 from cereal.services import service_list
 import cereal.messaging as messaging
-from selfdrive.car.tesla.readconfig import read_config_file,CarSettings
-from selfdrive.car.tesla.radar_interface import RadarInterface
+#from selfdrive.car.tesla.readconfig import read_config_file,CarSettings
+from selfdrive.car.volkswagen.radar_interface import RadarInterface
 
 #for calibration we only want fixed objects within 1 m of the center line and between 2.5 and 4.5 m far from radar
 MINX = 2.5 
