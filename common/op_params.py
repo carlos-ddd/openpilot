@@ -62,7 +62,7 @@ class opParams:
 
     VT = ValueTypes()
     self.fork_params = {'camera_offset': Param(0.06, VT.number, 'Your camera offset to use in lane_planner.py', live=True),
-                            'alca_nudge_required': Param(True, bool, 'Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
+                        'alca_nudge_required': Param(True, bool, 'Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
                                                                  'If False, lane change will occur IMMEDIATELY after signaling')}
 
     self._params_file = '/data/op_params.json'

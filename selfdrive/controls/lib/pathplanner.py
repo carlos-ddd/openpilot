@@ -9,7 +9,7 @@ from selfdrive.config import Conversions as CV
 from common.params import Params
 import cereal.messaging as messaging
 from cereal import log
-from common.op_params import opParams
+#from common.op_params import opParams
 
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
@@ -63,8 +63,9 @@ class PathPlanner():
     self.lane_change_ll_prob = 1.0
     self.prev_one_blinker = False
 
-    self.op_params = opParams()
-    self.alca_nudge_required = self.op_params.get('alca_nudge_required')                               
+    #self.op_params = opParams()
+    #self.alca_nudge_required = self.op_params.get('alca_nudge_required')                               
+
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
     self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, self.steer_rate_cost)
@@ -116,7 +117,8 @@ class PathPlanner():
       torque_applied = sm['carState'].steeringPressed and \
                        ((sm['carState'].steeringTorque > 0 and self.lane_change_direction == LaneChangeDirection.left) or
                         (sm['carState'].steeringTorque < 0 and self.lane_change_direction == LaneChangeDirection.right))
-      if not self.alca_nudge_required:
+      #if not self.alca_nudge_required:
+      if True: 
         torque_applied = True                                      
 
       blindspot_detected = ((sm['carState'].leftBlindspot and self.lane_change_direction == LaneChangeDirection.left) or
