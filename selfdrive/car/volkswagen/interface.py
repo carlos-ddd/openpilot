@@ -89,7 +89,7 @@ class CarInterface(CarInterfaceBase):
       ret.centerToFront = ret.wheelbase * 0.45  # Estimated
       ret.steerRatio = 16.4
 
-      # OP LONG parameters
+      # OP LONG parameters (https://github.com/commaai/openpilot/wiki/Tuning#Tuning-the-longitudinal-PI-controller)
       ret.gasMaxBP = [0., 1.]  # m/s
       ret.gasMaxV = [0.3, 1.0]  # max gas allowed
       ret.brakeMaxBP = [0.]  # m/s
@@ -97,9 +97,11 @@ class CarInterface(CarInterfaceBase):
       ret.openpilotLongitudinalControl = True
       ret.longitudinalTuning.deadzoneBP = [0.]
       ret.longitudinalTuning.deadzoneV = [0.]
-      ret.longitudinalTuning.kpBP = [0.]
+      # P
+      ret.longitudinalTuning.kpBP = [0.]  # m/s
       ret.longitudinalTuning.kpV = [0.95]
-      ret.longitudinalTuning.kiBP = [0.]
+      # I
+      ret.longitudinalTuning.kiBP = [0.]  # m/s
       ret.longitudinalTuning.kiV = [0.12]
 
       # PQ lateral tuning HCA_Status 7
@@ -187,6 +189,10 @@ class CarInterface(CarInterfaceBase):
       if self.pqCounter >= 330*100: #time in seconds until counter threshold for pqTimebombWarn alert
         if not self.wheelGrabbed:
           events.add(EventName.pqTimebombWarn)
+          if self.pqCounter >= 345*100: #time in seconds until pqTimebombTERMINAL
+            events.add(EventName.pqTimebombTERMINAL)
+            if self.pqCounter >= 359*100: #time in seconds until auto bypass
+              self.wheelGrabbed = True                       
         if self.wheelGrabbed or ret.steeringPressed:
           self.wheelGrabbed = True
           ret.stopSteering = True
@@ -201,6 +207,12 @@ class CarInterface(CarInterfaceBase):
       if not ret.cruiseState.enabled:
         self.pqCounter = 0
     #PQTIMEBOMB STUFF END
+    
+    if self.CS.gsaIntvActive:
+      events.add(EventName.pqShiftUP)
+    
+    if self.CS.espIntervention:
+      events.add(EventName.espInterventionDisengage)
 
     ret.events = events.to_msg()
     ret.buttonEvents = buttonEvents

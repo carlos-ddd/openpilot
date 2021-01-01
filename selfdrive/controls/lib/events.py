@@ -487,10 +487,42 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
 
   EventName.pqTimebombBypassed: {
     ET.WARNING: Alert(
-      "Bypassed!",
+      "Bypassed",
       "Release wheel when ready",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, 1., 2., 3.),
+  },
+    
+  EventName.pqTimebombTERMINAL: {
+    ET.WARNING: Alert(
+      "TIMEBOMB IMMINENT",
+      "Grab wheel now!",
+      AlertStatus.critical, AlertSize.full,
+      Priority.HIGH, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, .1, .1, .1),
+  },
+
+  EventName.pqShiftUP: {
+    ET.WARNING: Alert(
+      "Shift up",
+      "Consider ECO advice",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, 1., 2., 1.),
+  },
+  
+  EventName.pqShiftDOWN: {
+    ET.WARNING: Alert(
+      "Shift down",
+      "Consider ECO advice",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.none, AudibleAlert.none, 1., 2., 1.),
+  },
+
+  EventName.espInterventionDisengage: {
+    ET.WARNING: Alert(
+      "Automatic disengage",
+      "due to ESP intervention",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 2., 5.),
   },
 
   EventName.fanMalfunction: {

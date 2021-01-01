@@ -29,7 +29,7 @@ class CarState(CarStateBase):
       self.get_cam_can_parser = self.get_pq_cam_can_parser
       self.update = self.update_pq
       self.gsaHystActive = False   # gearshift assistant hysteris
-      self.gsaIntvActive = False   # gearshift assistant intervention
+      ret.gsaIntvActive = False   # gearshift assistant intervention
       self.gsaSpeedFreeze = 0.0
       if CP.transmissionType == TRANS.automatic:
         self.shifter_values = can_define.dv["Getriebe_1"]['Waehlhebelposition__Getriebe_1_']
@@ -216,6 +216,8 @@ class CarState(CarStateBase):
     # Additional safety checks performed in CarInterface.
     self.parkingBrakeSet = bool(pt_cp.vl["Kombi_1"]['Bremsinfo'])  # FIXME: need to include an EPB check as well
     ret.espDisabled = bool(pt_cp.vl["Bremse_1"]['ESP_Passiv_getastet'])
+    ret.espIntervention = bool(pt_cp.vl["Bremse_1"]['ESP_Eingriff']) or bool(pt_cp.vl["Bremse_1"]['ASR_Anforderung'])
+
 
     # Update gear and/or clutch position data.
     if trans_type == TRANS.automatic:
@@ -276,7 +278,7 @@ class CarState(CarStateBase):
       self.openpilot_enabled = False
 
     # Check if Gas or Brake pressed and override ACC emulation
-    if self.CP.enableGasInterceptor and (ret.gasPressed or ret.brakePressed):
+    if self.CP.enableGasInterceptor and (ret.gasPressed or ret.brakePressed or ret.espIntervention):
       self.openpilot_enabled = False
 
     # Override openpilot enabled if gas interceptor installed
@@ -298,14 +300,14 @@ class CarState(CarStateBase):
 #        self.gearAdviceValid = False
 
       # test RPM limit and prevent change as long as in hysteresis
-      if self.engineRPM > 2500.0 and not self.gsaHystActive:
+      if self.engineRPM > 2500.0 and not self.gsaHystActive and ret.vEgo<120.*CV.KPH_TO_MS:
         self.gsaSpeedFreeze = ret.vEgo
         self.gsaHystActive = True
       # within hysteresis band -> set RPM intervention active
       if self.gsaHystActive:
-        self.gsaIntvActive = True
+        ret.gsaIntvActive = True
       else:
-        self.gsaIntvActive = False
+        ret.gsaIntvActive = False
       # handle hysteresis flag
       if self.engineRPM < 2200.0:   # or self.gearAdvice < 0
         self.gsaHystActive = False
@@ -316,7 +318,7 @@ class CarState(CarStateBase):
                                                                       #    (to not prevent braking with clutch open)
       # apply limit when >RPM limit # + car advises to shift up
       # in last gear, no shift up advice is sent by ECU -> do not limit
-      elif self.gsaIntvActive:      # and self.gearAdvice > 0  and self.gearAdviceValid     # >RPM limit + no shift up advice -> last gear
+      elif ret.gsaIntvActive:      # and self.gearAdvice > 0  and self.gearAdviceValid     # >RPM limit + no shift up advice -> last gear
         ret.cruiseState.speed = self.gsaSpeedFreeze                   # limit RPM by using frozen speed
 
     if ret.cruiseState.speed > 70:  # 255 kph in m/s == no current setpoint
@@ -348,7 +350,7 @@ class CarState(CarStateBase):
     if self.CP.enableGasInterceptor:
       self.ABSWorking = pt_cp.vl["Bremse_8"]["BR8_Sta_ADR_BR"]
       self.currentSpeed = ret.vEgo
-
+    
     return ret
 
   @staticmethod
@@ -490,7 +492,9 @@ class CarState(CarStateBase):
       ("GRA_Zeitluecke", "GRA_Neu", 0),             # ACC button, time gap adj
       ("GRA_Neu_Zaehler", "GRA_Neu", 0),            # ACC button, time gap adj
       ("GRA_Sender", "GRA_Neu", 0),                 # GRA Sender Coding
-      ("BR8_Sta_ADR_BR", "Bremse_8", 0),           # ABS Pump actively braking for ACC
+      ("BR8_Sta_ADR_BR", "Bremse_8", 0),            # ABS Pump actively braking for ACC
+      ("ESP_Eingriff", "Bremse_1", 0),              # ABS stability intervention
+      ("ASR_Anforderung", "Bremse_1", 0),           # ABS slip detected      
     ]
 
     checks = [
