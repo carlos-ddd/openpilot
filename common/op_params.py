@@ -62,8 +62,21 @@ class opParams:
 
     VT = ValueTypes()
     self.fork_params = {'camera_offset': Param(0.06, VT.number, 'Your camera offset to use in lane_planner.py', live=True),
-                        'alca_nudge_required': Param(True, bool, 'Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
-                                                                 'If False, lane change will occur IMMEDIATELY after signaling')}
+                        'alca_nudge_required': Param(False, bool, 'Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
+                                                                 'If False, lane change will occur IMMEDIATELY after signaling'),
+                        'kpBP': Param(0., VT.number,
+                                        'Velocity breakpoint P (m/s).\n'
+                                        'Only one breakpoint available atm!', live=True),
+                        'kpV': Param(0.95, VT.number,
+                                      'P value.\n'
+                                      '(for velocity breakpoint)', live=True),
+                        'kiBP': Param(0., VT.number,
+                                      'Velocity breakpoint I (m/s).\n'
+                                      'Only one breakpoint available atm!', live=True),
+                        'kiV': Param(0.12, VT.number,
+                                     'I value.\n'
+                                     '(for velocity breakpoint)', live=True)
+                        }
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'

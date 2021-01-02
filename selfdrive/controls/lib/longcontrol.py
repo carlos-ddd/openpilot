@@ -1,6 +1,7 @@
 from cereal import log
 from common.numpy_fast import clip, interp
 from selfdrive.controls.lib.pid import PIController
+from common.op_params import opParams
 
 LongCtrlState = log.ControlsState.LongControlState
 
@@ -54,19 +55,28 @@ def long_control_state_trans(active, long_control_state, v_ego, v_target, v_pid,
 
 class LongControl():
   def __init__(self, CP, compute_gb):
+    self.op_params = opParams()     # for live parameter tuning of longitudinal (carlos-ddd)
     self.long_control_state = LongCtrlState.off  # initialized to off
     self.pid = PIController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
                             (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
                             rate=RATE,
                             sat_limit=0.8,
                             convert=compute_gb)
+    self.update_liveParams()    # overwrite those of the line above (carlos-ddd)
     self.v_pid = 0.0
     self.last_output_gb = 0.0
+
+
 
   def reset(self, v_pid):
     """Reset PID controller and change setpoint"""
     self.pid.reset()
     self.v_pid = v_pid
+
+  def update_liveParams(self):  # carlos-ddd
+    self.pid._k_p = (self.op_params.get('kpBP'), self.op_params.get('kpV'))
+    self.pid._k_i = (self.op_params.get('kiBP'), self.op_params.get('kiV'))
+    # self.pid.reset() is done within the call of LongControl.update()->"LongCtrlState.off or CS.gasPressed" call-path
 
   def update(self, active, CS, v_target, v_target_future, a_target, CP):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
@@ -83,6 +93,7 @@ class LongControl():
     v_ego_pid = max(CS.vEgo, MIN_CAN_SPEED)  # Without this we get jumps, CAN bus reports 0 when speed < 0.3
 
     if self.long_control_state == LongCtrlState.off or CS.gasPressed:
+      self.update_liveParams()    # carlos-ddd
       self.reset(v_ego_pid)
       output_gb = 0.
 

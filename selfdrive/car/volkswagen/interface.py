@@ -93,14 +93,14 @@ class CarInterface(CarInterfaceBase):
       ret.gasMaxBP = [0., 1.]  # m/s
       ret.gasMaxV = [0.3, 1.0]  # max gas allowed
       ret.brakeMaxBP = [0.]  # m/s
-      ret.brakeMaxV = [1.]  # max brake allowed
+      ret.brakeMaxV = [1.]  # max brake allowed (positive number)
       ret.openpilotLongitudinalControl = True
       ret.longitudinalTuning.deadzoneBP = [0.]
       ret.longitudinalTuning.deadzoneV = [0.]
-      # P
+      # P value !!!! DO NOT TUNE HERE -> THESE VALUES ARE IMMEDIATELY OVERWRITTEN IN selfdrive/controls/lib/longcontrol.py !!!!
       ret.longitudinalTuning.kpBP = [0.]  # m/s
       ret.longitudinalTuning.kpV = [0.95]
-      # I
+      # I value !!!! DO NOT TUNE HERE -> THESE VALUES ARE IMMEDIATELY OVERWRITTEN IN selfdrive/controls/lib/longcontrol.py !!!!
       ret.longitudinalTuning.kiBP = [0.]  # m/s
       ret.longitudinalTuning.kiV = [0.12]
 
@@ -192,7 +192,7 @@ class CarInterface(CarInterfaceBase):
           if self.pqCounter >= 345*100: #time in seconds until pqTimebombTERMINAL
             events.add(EventName.pqTimebombTERMINAL)
             if self.pqCounter >= 359*100: #time in seconds until auto bypass
-              self.wheelGrabbed = True                       
+              self.wheelGrabbed = True
         if self.wheelGrabbed or ret.steeringPressed:
           self.wheelGrabbed = True
           ret.stopSteering = True
@@ -207,10 +207,10 @@ class CarInterface(CarInterfaceBase):
       if not ret.cruiseState.enabled:
         self.pqCounter = 0
     #PQTIMEBOMB STUFF END
-    
+
     if self.CS.gsaIntvActive:
       events.add(EventName.pqShiftUP)
-    
+
 #    if self.CS.espIntervention:
 #      events.add(EventName.espInterventionDisengage)
 
