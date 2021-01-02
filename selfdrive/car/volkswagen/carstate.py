@@ -29,7 +29,7 @@ class CarState(CarStateBase):
       self.get_cam_can_parser = self.get_pq_cam_can_parser
       self.update = self.update_pq
       self.gsaHystActive = False   # gearshift assistant hysteris
-      ret.gsaIntvActive = False   # gearshift assistant intervention
+      self.gsaIntvActive = False
       self.gsaSpeedFreeze = 0.0
       if CP.transmissionType == TRANS.automatic:
         self.shifter_values = can_define.dv["Getriebe_1"]['Waehlhebelposition__Getriebe_1_']
@@ -305,9 +305,9 @@ class CarState(CarStateBase):
         self.gsaHystActive = True
       # within hysteresis band -> set RPM intervention active
       if self.gsaHystActive:
-        ret.gsaIntvActive = True
+        self.gsaIntvActive = True
       else:
-        ret.gsaIntvActive = False
+        self.gsaIntvActive = False
       # handle hysteresis flag
       if self.engineRPM < 2200.0:   # or self.gearAdvice < 0
         self.gsaHystActive = False
@@ -318,8 +318,10 @@ class CarState(CarStateBase):
                                                                       #    (to not prevent braking with clutch open)
       # apply limit when >RPM limit # + car advises to shift up
       # in last gear, no shift up advice is sent by ECU -> do not limit
-      elif ret.gsaIntvActive:      # and self.gearAdvice > 0  and self.gearAdviceValid     # >RPM limit + no shift up advice -> last gear
+      elif self.gsaIntvActive:      # and self.gearAdvice > 0  and self.gearAdviceValid     # >RPM limit + no shift up advice -> last gear
         ret.cruiseState.speed = self.gsaSpeedFreeze                   # limit RPM by using frozen speed
+
+      ret.engineRPMlimited = self.gsaIntvActive
 
     if ret.cruiseState.speed > 70:  # 255 kph in m/s == no current setpoint
       ret.cruiseState.speed = 0

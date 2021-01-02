@@ -211,8 +211,8 @@ class CarInterface(CarInterfaceBase):
     if self.CS.gsaIntvActive:
       events.add(EventName.pqShiftUP)
     
-    if self.CS.espIntervention:
-      events.add(EventName.espInterventionDisengage)
+#    if self.CS.espIntervention:
+#      events.add(EventName.espInterventionDisengage)
 
     ret.events = events.to_msg()
     ret.buttonEvents = buttonEvents
