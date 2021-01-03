@@ -62,7 +62,7 @@ class LongControl():
                             rate=RATE,
                             sat_limit=0.8,
                             convert=compute_gb)
-    self.update_liveParams()    # overwrite those of the line above (carlos-ddd)
+    self.update_liveParams(CP)    # overwrite those of the line above (carlos-ddd)
     self.v_pid = 0.0
     self.last_output_gb = 0.0
 
