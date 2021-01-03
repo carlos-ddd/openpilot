@@ -74,8 +74,8 @@ class LongControl():
     self.v_pid = v_pid
 
   def update_liveParams(self):  # carlos-ddd
-    self.pid._k_p = (self.op_params.get('kpBP'), self.op_params.get('kpV'))
-    self.pid._k_i = (self.op_params.get('kiBP'), self.op_params.get('kiV'))
+    self.pid._k_p = ([self.op_params.get('kpBP')], [self.op_params.get('kpV')])
+    self.pid._k_i = ([self.op_params.get('kiBP')], [self.op_params.get('kiV')])
     # self.pid.reset() is done within the call of LongControl.update()->"LongCtrlState.off or CS.gasPressed" call-path
 
   def update(self, active, CS, v_target, v_target_future, a_target, CP):
