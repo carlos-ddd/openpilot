@@ -64,18 +64,50 @@ class opParams:
     self.fork_params = {'camera_offset': Param(0.06, VT.number, 'Your camera offset to use in lane_planner.py', live=True),
                         'alca_nudge_required': Param(False, bool, 'Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
                                                                  'If False, lane change will occur IMMEDIATELY after signaling'),
+                        'long_tune_single_params': Param(True, bool, 'True = use single parameters (with only one breakpoint) for longitudinal control loop '
+                                                                 'Params are: kpBP + kpV, kiBP + kiV, gasMaxBP + gasMaxV, brakeMaxBP + brakeMaxV', live=True),
                         'kpBP': Param(0., VT.number,
                                         'Velocity breakpoint P (m/s).\n'
-                                        'Only one breakpoint available atm!', live=True),
+                                        'Only one breakpoint available (long_tune_single_params=True)', live=True),
                         'kpV': Param(0.95, VT.number,
                                       'P value.\n'
                                       '(for velocity breakpoint)', live=True),
                         'kiBP': Param(0., VT.number,
                                       'Velocity breakpoint I (m/s).\n'
-                                      'Only one breakpoint available atm!', live=True),
+                                      'Only one breakpoint available (long_tune_single_params=True)', live=True),
                         'kiV': Param(0.12, VT.number,
                                      'I value.\n'
-                                     '(for velocity breakpoint)', live=True)
+                                     '(for velocity breakpoint)', live=True),
+                        'gasMaxBP': Param(1., VT.number,
+                                      'Velocity breakpoint for maximum gas (m/s).\n'
+                                      'Standstill breakpoint for 0. m/s with value .3 automatically exists.', live=True),
+                        'gasMaxV': Param(1., VT.number,
+                                      'Maximum gas value.\n'
+                                      'range: 0.0 ... 1.0', live=True),
+                        'brakeMaxBP': Param(0., VT.number,
+                                      'Velocity breakpoint for maximum brake (m/s).\n'
+                                      'Only one breakpoint available atm!', live=True),
+                        'brakeMaxV': Param(1., VT.number,
+                                      'Maximum brake value.\n'
+                                      'range: 0.0 ... 1.0', live=True),
+                        'deadzoneBP': Param(0., VT.number,
+                                      'Velocity breakpoint for deadzone (m/s).\n'
+                                      'Only one breakpoint available atm!', live=True),
+                        'deadzoneV': Param(0., VT.number,
+                                      'Deadzone value.\n'
+                                      'control-loop-error is set to 0.0 if +/- within this range', live=True),
+                        'kpBP_slow': Param(5.5, VT.number, 'Velocity breakpoint P slow (m/s).\n' '(long_tune_single_params must be False)', live=True),
+                        'kpV_slow': Param(0.95, VT.number, 'P (slow)\n', live=True),
+                        'kiBP_slow': Param(5.5, VT.number, 'Velocity breakpoint I (m/s) slow.\n' '(long_tune_single_params must be False)', live=True),
+                        'kiV_slow': Param(0., VT.number, 'I (slow)\n' '(for velocity breakpoint)', live=True),
+                        'kpBP_mid': Param(14., VT.number, 'Velocity breakpoint P mid (m/s).\n' '(long_tune_single_params must be False)', live=True),
+                        'kpV_mid': Param(0.95, VT.number, 'P (mid)\n', live=True),
+                        'kiBP_mid': Param(14., VT.number, 'Velocity breakpoint I (m/s) mid.\n' '(long_tune_single_params must be False)', live=True),
+                        'kiV_mid': Param(0., VT.number, 'I (mid)\n' '(for velocity breakpoint)', live=True),
+                        'kpBP_fast': Param(22., VT.number, 'Velocity breakpoint P fast (m/s).\n' '(long_tune_single_params must be False)', live=True),
+                        'kpV_fast': Param(0.95, VT.number, 'P (fast)\n', live=True),
+                        'kiBP_fast': Param(22., VT.number, 'Velocity breakpoint I (m/s) fast.\n' '(long_tune_single_params must be False)', live=True),
+                        'kiV_fast': Param(0., VT.number, 'I (fast)\n' '(for velocity breakpoint)', live=True)
                         }
 
     self._params_file = '/data/op_params.json'

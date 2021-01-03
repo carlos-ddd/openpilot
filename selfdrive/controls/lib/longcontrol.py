@@ -73,10 +73,26 @@ class LongControl():
     self.pid.reset()
     self.v_pid = v_pid
 
-  def update_liveParams(self):  # carlos-ddd
-    self.pid._k_p = ([self.op_params.get('kpBP')], [self.op_params.get('kpV')])
-    self.pid._k_i = ([self.op_params.get('kiBP')], [self.op_params.get('kiV')])
+  def update_liveParams(self, CP):  # carlos-ddd
+  
+    if self.op_params.get('long_tune_single_params') == True:  # spot tuning
+      self.pid._k_p = ([self.op_params.get('kpBP')], [self.op_params.get('kpV')])
+      self.pid._k_i = ([self.op_params.get('kiBP')], [self.op_params.get('kiV')])
+    else:  # use interpolated (final list)
+      self.pid._k_p = ([self.op_params.get('kpBP_slow'), self.op_params.get('kpBP_mid'), self.op_params.get('kpBP_fast')], [self.op_params.get('kpV_slow'), self.op_params.get('kpV_mid'), self.op_params.get('kpV_fast')])
+      self.pid._k_i = ([self.op_params.get('kiBP_slow'), self.op_params.get('kiBP_mid'), self.op_params.get('kiBP_fast')], [self.op_params.get('kiV_slow'), self.op_params.get('kiV_mid'), self.op_params.get('kiV_fast')])
     # self.pid.reset() is done within the call of LongControl.update()->"LongCtrlState.off or CS.gasPressed" call-path
+    
+    # FOLLOWING values have no breakpoints yet!
+    CP.gasMaxBP = [0., self.op_params.get('gasMaxBP')]
+    CP.gasMaxV = [.3, self.op_params.get('gasMaxV')]  # limit maximum gas in standstill (safety)
+    
+    CP.brakeMaxBP = [self.op_params.get('brakeMaxBP')]
+    CP.brakeMaxV = [self.op_params.get('brakeMaxV')]
+    
+    CP.longitudinalTuning.deadzoneBP = [self.op_params.get('deadzoneBP')]
+    CP.longitudinalTuning.deadzoneV = [self.op_params.get('deadzoneV')]
+    
 
   def update(self, active, CS, v_target, v_target_future, a_target, CP):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
@@ -93,7 +109,7 @@ class LongControl():
     v_ego_pid = max(CS.vEgo, MIN_CAN_SPEED)  # Without this we get jumps, CAN bus reports 0 when speed < 0.3
 
     if self.long_control_state == LongCtrlState.off or CS.gasPressed:
-      self.update_liveParams()    # carlos-ddd
+      self.update_liveParams(CP)    # carlos-ddd
       self.reset(v_ego_pid)
       output_gb = 0.
 
