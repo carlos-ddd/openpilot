@@ -96,18 +96,14 @@ class opParams:
                         'deadzoneV': Param(0., VT.number,
                                       'Deadzone value.\n'
                                       'control-loop-error is set to 0.0 if +/- within this range', live=True),
-                        'kpBP_slow': Param(5.5, VT.number, 'Velocity breakpoint P slow (m/s).\n' '(long_tune_single_params must be False)', live=True),
-                        'kpV_slow': Param(0.95, VT.number, 'P (slow)\n', live=True),
-                        'kiBP_slow': Param(5.5, VT.number, 'Velocity breakpoint I (m/s) slow.\n' '(long_tune_single_params must be False)', live=True),
-                        'kiV_slow': Param(0., VT.number, 'I (slow)\n' '(for velocity breakpoint)', live=True),
-                        'kpBP_mid': Param(14., VT.number, 'Velocity breakpoint P mid (m/s).\n' '(long_tune_single_params must be False)', live=True),
-                        'kpV_mid': Param(0.95, VT.number, 'P (mid)\n', live=True),
-                        'kiBP_mid': Param(14., VT.number, 'Velocity breakpoint I (m/s) mid.\n' '(long_tune_single_params must be False)', live=True),
-                        'kiV_mid': Param(0., VT.number, 'I (mid)\n' '(for velocity breakpoint)', live=True),
-                        'kpBP_fast': Param(22., VT.number, 'Velocity breakpoint P fast (m/s).\n' '(long_tune_single_params must be False)', live=True),
-                        'kpV_fast': Param(0.95, VT.number, 'P (fast)\n', live=True),
-                        'kiBP_fast': Param(22., VT.number, 'Velocity breakpoint I (m/s) fast.\n' '(long_tune_single_params must be False)', live=True),
-                        'kiV_fast': Param(0., VT.number, 'I (fast)\n' '(for velocity breakpoint)', live=True)
+                        'kpV_30': Param(0., VT.number, 'P 30 km/h', live=True),
+                        'kpV_50': Param(0., VT.number, 'P 50 km/h', live=True),
+                        'kpV_80': Param(0., VT.number, 'P 80 km/h', live=True),
+                        'kpV_120': Param(0., VT.number, 'P 120 km/h', live=True),
+                        'kiV_30': Param(0., VT.number, 'I 30 km/h', live=True),
+                        'kiV_50': Param(0., VT.number, 'I 50 km/h', live=True),
+                        'kiV_80': Param(0., VT.number, 'I 80 km/h', live=True),
+                        'kiV_120': Param(0., VT.number, 'I 120 km/h', live=True)
                         }
 
     self._params_file = '/data/op_params.json'

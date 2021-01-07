@@ -79,8 +79,9 @@ class LongControl():
       self.pid._k_p = ([self.op_params.get('kpBP')], [self.op_params.get('kpV')])
       self.pid._k_i = ([self.op_params.get('kiBP')], [self.op_params.get('kiV')])
     else:  # use interpolated (final list)
-      self.pid._k_p = ([self.op_params.get('kpBP_slow'), self.op_params.get('kpBP_mid'), self.op_params.get('kpBP_fast')], [self.op_params.get('kpV_slow'), self.op_params.get('kpV_mid'), self.op_params.get('kpV_fast')])
-      self.pid._k_i = ([self.op_params.get('kiBP_slow'), self.op_params.get('kiBP_mid'), self.op_params.get('kiBP_fast')], [self.op_params.get('kiV_slow'), self.op_params.get('kiV_mid'), self.op_params.get('kiV_fast')])
+      #       kph:      30   50    80    120
+      self.pid._k_p = ([8.3, 13.8, 22.2, 33.3], [self.op_params.get('kpV_30'), self.op_params.get('kpV_50'), self.op_params.get('kpV_80'), self.op_params.get('kpV_120')])
+      self.pid._k_i = ([8.3, 13.8, 22.2, 33.3], [self.op_params.get('kiV_30'), self.op_params.get('kiV_50'), self.op_params.get('kiV_80'), self.op_params.get('kiV_120')])
     # self.pid.reset() is done within the call of LongControl.update()->"LongCtrlState.off or CS.gasPressed" call-path
     
     # FOLLOWING values have no breakpoints yet!
