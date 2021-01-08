@@ -150,7 +150,7 @@ class CarController():
           elif apply_brake > 1199:
             apply_brake = 1200
             CS.brake_warning = True
-          if CS.currentSpeed < 2.7:
+          if CS.currentSpeed < 1.94: #7kph
             stopping_wish = True
         else:
           mobPreEnable = False
