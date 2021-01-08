@@ -138,7 +138,7 @@ class CarController():
       stopping_wish = False
 
       if enabled:
-        if (apply_brake < 40):
+        if (apply_brake < 0):
           apply_brake = 0
         if apply_brake > 0:
           if not mobEnabled:
@@ -150,7 +150,7 @@ class CarController():
           elif apply_brake > 1199:
             apply_brake = 1200
             CS.brake_warning = True
-          if CS.currentSpeed < 5.6:
+          if CS.currentSpeed < 2.7:
             stopping_wish = True
         else:
           mobPreEnable = False
