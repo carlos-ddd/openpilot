@@ -164,7 +164,7 @@ class LongControl():
       self.prntLoop = 0
       self.prntGas.append(final_gas)
       self.prntBrake.append(final_brake)
-      self.prntVist.append(self.v_ego_pid)
+      self.prntVist.append(v_ego_pid)
       self.prntVsoll.append(self.v_pid)
       self.prntGB(output_gb_save)
       self.prntCount += 1
