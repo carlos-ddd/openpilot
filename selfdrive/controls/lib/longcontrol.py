@@ -66,6 +66,11 @@ class LongControl():
     self.v_pid = 0.0
     self.last_output_gb = 0.0
 
+    self.prntCount = 0
+    self.prntGas = []
+    self.prntBrake = []
+    self.prntVist = []
+    self.prntVsoll = []
 
 
   def reset(self, v_pid):
@@ -148,5 +153,18 @@ class LongControl():
     self.last_output_gb = output_gb
     final_gas = clip(output_gb, 0., gas_max)
     final_brake = -clip(output_gb, -brake_max, 0.)
+   
+    # carlos-ddd plotting efforts
+    self.prntGas.append(final_gas)
+    self.prntBrake.append(final_brake)
+    self.prntVist.append(self.v_ego_pid)
+    self.prntVsoll.append(self.v_pid)
+    self.prntCount += 1
+    if self.prntCount == 30:
+      print(self.prntGas, self.prntBrake, self.prntVist, self.prntVsoll)
+      self.prntGas.clear()
+      self.prntBrake.clear()
+      self.prntVist.clear()
+      self.prntVsoll.clear()
 
     return final_gas, final_brake
