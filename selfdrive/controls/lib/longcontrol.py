@@ -67,10 +67,13 @@ class LongControl():
     self.last_output_gb = 0.0
 
     self.prntCount = 0
+    self.prntLoop = 0
+    self.prntTotal = 0
     self.prntGas = []
     self.prntBrake = []
     self.prntVist = []
     self.prntVsoll = []
+    self.prntGB = []
 
 
   def reset(self, v_pid):
@@ -131,6 +134,7 @@ class LongControl():
       deadzone = interp(v_ego_pid, CP.longitudinalTuning.deadzoneBP, CP.longitudinalTuning.deadzoneV)
 
       output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=(prevent_overshoot or CS.clutchPressed))
+      output_gb_save = output_gb # carlos-ddd save for later plotting before clipping, limiting, etc to evaluate pid-performance
 
       if prevent_overshoot:
         output_gb = min(output_gb, 0.0)
@@ -155,16 +159,40 @@ class LongControl():
     final_brake = -clip(output_gb, -brake_max, 0.)
    
     # carlos-ddd plotting efforts
-    self.prntGas.append(final_gas)
-    self.prntBrake.append(final_brake)
-    self.prntVist.append(self.v_ego_pid)
-    self.prntVsoll.append(self.v_pid)
-    self.prntCount += 1
-    if self.prntCount == 30:
-      print(self.prntGas, self.prntBrake, self.prntVist, self.prntVsoll)
-      self.prntGas.clear()
-      self.prntBrake.clear()
-      self.prntVist.clear()
-      self.prntVsoll.clear()
+    self.prntLoop += 1
+    if self.prntLoop >= 20: # record every 20th value => 5 values per second (100Hz calls here)
+      self.prntLoop = 0
+      self.prntGas.append(final_gas)
+      self.prntBrake.append(final_brake)
+      self.prntVist.append(self.v_ego_pid)
+      self.prntVsoll.append(self.v_pid)
+      self.prntGB(output_gb_save)
+      self.prntCount += 1
+      if self.prntCount >= 10: # print them every 2 seconds (10 values at once)
+        self.prntCount = 0
+        print("k2-plot:%i:"%(self.prntTotal), end='')
+        
+        for itm in self.prntGas:
+          print("%.5f,"%(itm), end='')
+        print(":", end='')
+        
+        for itm in self.prntBrake:
+          print("%.5f,"%(itm), end='')
+        print(":", end='')
+        
+        for itm in self.prntVist:
+          print("%.2f,"%(itm), end='')
+        print(":", end='')
+        
+        for itm in self.prntVsoll:
+          print("%.1f,"%(itm), end='')
+        print(":")
+        
+        self.prntGas.clear()
+        self.prntBrake.clear()
+        self.prntVist.clear()
+        self.prntVsoll.clear()
+        self.prntGB.clear()
+        self.prntTotal += 1
 
     return final_gas, final_brake
