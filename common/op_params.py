@@ -96,10 +96,12 @@ class opParams:
                         'deadzoneV': Param(0., VT.number,
                                       'Deadzone value.\n'
                                       'control-loop-error is set to 0.0 if +/- within this range', live=True),
+                        'kpV_10': Param(0., VT.number, 'P 10 km/h', live=True),
                         'kpV_30': Param(0., VT.number, 'P 30 km/h', live=True),
                         'kpV_50': Param(0., VT.number, 'P 50 km/h', live=True),
                         'kpV_80': Param(0., VT.number, 'P 80 km/h', live=True),
                         'kpV_120': Param(0., VT.number, 'P 120 km/h', live=True),
+                        'kiV_10': Param(0., VT.number, 'I 10 km/h', live=True),
                         'kiV_30': Param(0., VT.number, 'I 30 km/h', live=True),
                         'kiV_50': Param(0., VT.number, 'I 50 km/h', live=True),
                         'kiV_80': Param(0., VT.number, 'I 80 km/h', live=True),
