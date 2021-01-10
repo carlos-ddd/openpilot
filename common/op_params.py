@@ -105,7 +105,17 @@ class opParams:
                         'kiV_30': Param(0., VT.number, 'I 30 km/h', live=True),
                         'kiV_50': Param(0., VT.number, 'I 50 km/h', live=True),
                         'kiV_80': Param(0., VT.number, 'I 80 km/h', live=True),
-                        'kiV_120': Param(0., VT.number, 'I 120 km/h', live=True)
+                        'kiV_120': Param(0., VT.number, 'I 120 km/h', live=True),
+                        'gasMax_10': Param(1., VT.number, 'maximum gas 10 km/h', live=True),
+                        'gasMax_30': Param(1., VT.number, 'maximum gas 30 km/h', live=True),
+                        'gasMax_50': Param(1., VT.number, 'maximum gas 50 km/h', live=True),
+                        'gasMax_80': Param(1., VT.number, 'maximum gas 80 km/h', live=True),
+                        'gasMax_120': Param(1., VT.number, 'maximum gas 120 km/h', live=True),
+                        'deadZone_10': Param(.1, VT.number, 'deadzone 10 km/h', live=True),
+                        'deadZone_30': Param(.1, VT.number, 'deadzone 30 km/h', live=True),
+                        'deadZone_50': Param(.1, VT.number, 'deadzone 50 km/h', live=True),
+                        'deadZone_80': Param(.1, VT.number, 'deadzone 80 km/h', live=True),
+                        'deadZone_120': Param(.1, VT.number, 'deadzone 120 km/h', live=True)
                         }
 
     self._params_file = '/data/op_params.json'

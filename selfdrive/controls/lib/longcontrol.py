@@ -74,6 +74,7 @@ class LongControl():
     self.prntVist = []
     self.prntVsoll = []
     self.prntGB = []
+    self.prntAtarget = []
 
 
   def reset(self, v_pid):
@@ -86,21 +87,32 @@ class LongControl():
     if self.op_params.get('long_tune_single_params') == True:  # spot tuning
       self.pid._k_p = ([self.op_params.get('kpBP')], [self.op_params.get('kpV')])
       self.pid._k_i = ([self.op_params.get('kiBP')], [self.op_params.get('kiV')])
+      
+      # FOLLOWING values have no breakpoints yet!
+      CP.gasMaxBP = [0., self.op_params.get('gasMaxBP')]
+      CP.gasMaxV = [.3, self.op_params.get('gasMaxV')]  # limit maximum gas in standstill (safety)
+      
+      CP.brakeMaxBP = [self.op_params.get('brakeMaxBP')]
+      CP.brakeMaxV = [self.op_params.get('brakeMaxV')]
+      
+      CP.longitudinalTuning.deadzoneBP = [self.op_params.get('deadzoneBP')]
+      CP.longitudinalTuning.deadzoneV = [self.op_params.get('deadzoneV')]
+      
     else:  # use interpolated (final list)
       #       kph:      10   30   50    80    120
       self.pid._k_p = ([2.8, 8.3, 13.8, 22.2, 33.3], [self.op_params.get('kpV_10'), self.op_params.get('kpV_30'), self.op_params.get('kpV_50'), self.op_params.get('kpV_80'), self.op_params.get('kpV_120')])
       self.pid._k_i = ([2.8, 8.3, 13.8, 22.2, 33.3], [self.op_params.get('kiV_10'), self.op_params.get('kiV_30'), self.op_params.get('kiV_50'), self.op_params.get('kiV_80'), self.op_params.get('kiV_120')])
-    # self.pid.reset() is done within the call of LongControl.update()->"LongCtrlState.off or CS.gasPressed" call-path
+      # self.pid.reset() is done within the call of LongControl.update()->"LongCtrlState.off or CS.gasPressed" call-path
     
-    # FOLLOWING values have no breakpoints yet!
-    CP.gasMaxBP = [0., self.op_params.get('gasMaxBP')]
-    CP.gasMaxV = [.3, self.op_params.get('gasMaxV')]  # limit maximum gas in standstill (safety)
-    
-    CP.brakeMaxBP = [self.op_params.get('brakeMaxBP')]
-    CP.brakeMaxV = [self.op_params.get('brakeMaxV')]
-    
-    CP.longitudinalTuning.deadzoneBP = [self.op_params.get('deadzoneBP')]
-    CP.longitudinalTuning.deadzoneV = [self.op_params.get('deadzoneV')]
+      # FOLLOWING values have no breakpoints yet!
+      CP.gasMaxBP = [0., 2.8, 8.3, 13.8, 22.2, 33.3]
+      CP.gasMaxV = [.3, self.op_params.get('gasMax_10'), self.op_params.get('gasMax_30'), self.op_params.get('gasMax_50'), self.op_params.get('gasMax_80'), self.op_params.get('gasMax_120')]  # limit maximum gas in standstill (safety)
+      
+      CP.brakeMaxBP = [self.op_params.get('brakeMaxBP')]
+      CP.brakeMaxV = [self.op_params.get('brakeMaxV')]
+      
+      CP.longitudinalTuning.deadzoneBP = [2.8, 8.3, 13.8, 22.2, 33.3]
+      CP.longitudinalTuning.deadzoneV = [self.op_params.get('deadZone_10'), self.op_params.get('deadZone_30'), self.op_params.get('deadZone_50'), self.op_params.get('deadZone_80'), self.op_params.get('deadZone_120')]
     
 
   def update(self, active, CS, v_target, v_target_future, a_target, CP):
@@ -169,6 +181,7 @@ class LongControl():
       self.prntVist.append(v_ego_pid)
       self.prntVsoll.append(self.v_pid)
       self.prntGB.append(output_gb_save)
+      self.prntAtarget.append(a_target)
       self.prntCount += 1
       if self.prntCount >= 10: # print them every 2 seconds (10 values at once)
         self.prntCount = 0
@@ -189,6 +202,15 @@ class LongControl():
         for itm in self.prntVsoll:
           print("%.1f,"%(itm), end='')
         print(":", end='')
+        
+#        for itm in self.prntGB:
+#          print("%.5f,"%(itm), end='')
+#        print(":", end='')
+        
+        for itm in self.prntAtarget:
+          print("%.5f,"%(itm), end='')
+        print(":", end='')
+        
         print(";")
         
         self.prntGas.clear()
@@ -196,6 +218,8 @@ class LongControl():
         self.prntVist.clear()
         self.prntVsoll.clear()
         self.prntGB.clear()
+        self.prntAtarget.clear()
+        
         self.prntTotal += 1
 
     return final_gas, final_brake
