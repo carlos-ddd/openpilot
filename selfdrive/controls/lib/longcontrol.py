@@ -188,7 +188,8 @@ class LongControl():
         
         for itm in self.prntVsoll:
           print("%.1f,"%(itm), end='')
-        print(":")
+        print(":", end='')
+        print(";")
         
         self.prntGas.clear()
         self.prntBrake.clear()
