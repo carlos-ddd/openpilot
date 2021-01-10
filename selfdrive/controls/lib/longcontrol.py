@@ -117,6 +117,8 @@ class LongControl():
 
     v_ego_pid = max(CS.vEgo, MIN_CAN_SPEED)  # Without this we get jumps, CAN bus reports 0 when speed < 0.3
 
+    output_gb_save = 0. # carlos-ddd
+
     if self.long_control_state == LongCtrlState.off or CS.gasPressed:
       self.update_liveParams(CP)    # carlos-ddd
       self.reset(v_ego_pid)
@@ -166,7 +168,7 @@ class LongControl():
       self.prntBrake.append(final_brake)
       self.prntVist.append(v_ego_pid)
       self.prntVsoll.append(self.v_pid)
-      self.prntGB(output_gb_save)
+      self.prntGB.append(output_gb_save)
       self.prntCount += 1
       if self.prntCount >= 10: # print them every 2 seconds (10 values at once)
         self.prntCount = 0
