@@ -75,6 +75,7 @@ class LongControl():
     self.prntVsoll = []
     self.prntGB = []
     self.prntAtarget = []
+    self.prntSta = []
 
 
   def reset(self, v_pid):
@@ -131,10 +132,13 @@ class LongControl():
 
     output_gb_save = 0. # carlos-ddd
 
+    prntStai = -1
+
     if self.long_control_state == LongCtrlState.off or CS.gasPressed:
       self.update_liveParams(CP)    # carlos-ddd
       self.reset(v_ego_pid)
       output_gb = 0.
+      prntStai = 0
 
     # tracking objects and driving
     elif self.long_control_state == LongCtrlState.pid:
@@ -149,9 +153,11 @@ class LongControl():
 
       output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=(prevent_overshoot or CS.clutchPressed))
       output_gb_save = output_gb # carlos-ddd save for later plotting before clipping, limiting, etc to evaluate pid-performance
+      prntStai = 1
 
       if prevent_overshoot:
         output_gb = min(output_gb, 0.0)
+        prntStai = 2
 
     # Intention is to stop, switch to a different brake control until we stop
     elif self.long_control_state == LongCtrlState.stopping:
@@ -162,16 +168,21 @@ class LongControl():
 
       self.reset(CS.vEgo)
 
+      prntStai = 3
+
     # Intention is to move again, release brake fast before handing control to PID
     elif self.long_control_state == LongCtrlState.starting:
+      prntStai = 4
       if output_gb < -0.2:
         output_gb += STARTING_BRAKE_RATE / RATE
+        prntStai = 5
       self.reset(CS.vEgo)
 
     self.last_output_gb = output_gb
     final_gas = clip(output_gb, 0., gas_max)
     final_brake = -clip(output_gb, -brake_max, 0.)
    
+
     # carlos-ddd plotting efforts
     self.prntLoop += 1
     if self.prntLoop >= 20: # record every 20th value => 5 values per second (100Hz calls here)
@@ -182,6 +193,7 @@ class LongControl():
       self.prntVsoll.append(self.v_pid)
       self.prntGB.append(output_gb_save)
       self.prntAtarget.append(a_target)
+      self.prntSta.append(prntStai)
       self.prntCount += 1
       if self.prntCount >= 10: # print them every 2 seconds (10 values at once)
         self.prntCount = 0
@@ -210,6 +222,10 @@ class LongControl():
         for itm in self.prntAtarget:
           print("%.5f,"%(itm), end='')
         print(":", end='')
+
+        for itm in self.prntSta:
+          print("%i,"%(itm), end='')
+        print(":", end='')
         
         print(";")
         
@@ -219,6 +235,7 @@ class LongControl():
         self.prntVsoll.clear()
         self.prntGB.clear()
         self.prntAtarget.clear()
+        self.prntSta.clear()
         
         self.prntTotal += 1
 
