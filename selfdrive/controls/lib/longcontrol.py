@@ -28,23 +28,23 @@ def long_control_state_trans(active, long_control_state, v_ego, v_target, v_pid,
 
   starting_condition = v_target > STARTING_TARGET_SPEED and not cruise_standstill
 
-  if not active:
+  if not active: # safe OFF
     long_control_state = LongCtrlState.off
 
   else:
     if long_control_state == LongCtrlState.off:
       if active:
-        long_control_state = LongCtrlState.pid
+        long_control_state = LongCtrlState.pid # OFF -> PID
 
-    elif long_control_state == LongCtrlState.pid:
+    elif long_control_state == LongCtrlState.pid: # PID -> STOPPING
       if stopping_condition:
         long_control_state = LongCtrlState.stopping
 
-    elif long_control_state == LongCtrlState.stopping:
+    elif long_control_state == LongCtrlState.stopping: # STOPPING -> STARTING
       if starting_condition:
         long_control_state = LongCtrlState.starting
 
-    elif long_control_state == LongCtrlState.starting:
+    elif long_control_state == LongCtrlState.starting: # STARTING -> STOPPING
       if stopping_condition:
         long_control_state = LongCtrlState.stopping
       elif output_gb >= -BRAKE_THRESHOLD_TO_PID:
@@ -76,12 +76,15 @@ class LongControl():
     self.prntGB = []
     self.prntAtarget = []
     self.prntSta = []
+    
+    self.cruise_coast_hyst = False
 
 
   def reset(self, v_pid):
     """Reset PID controller and change setpoint"""
     self.pid.reset()
     self.v_pid = v_pid
+    self.cruise_coast_hyst = False # carlos-ddd forced cruise control coasting
 
   def update_liveParams(self, CP):  # carlos-ddd
   
@@ -129,16 +132,37 @@ class LongControl():
                                                        CS.brakePressed, CS.cruiseState.standstill)
 
     v_ego_pid = max(CS.vEgo, MIN_CAN_SPEED)  # Without this we get jumps, CAN bus reports 0 when speed < 0.3
+    
+    
+    # carlos-ddd plotting helpers
+    output_gb_save = 0.
+    prntStai = 0
+    
+    # carlos-ddd: Force no gas when cruise-setspeed is smaller (inhibit OP's unwanded deceleration-gas-pressing instead of using drag deceleration of motor)
+    if (CS.cruiseState.speed + 1.3) < v_ego_pid and not self.cruise_coast_hyst: # until +5km/h (~1.3m/s) of cruise-setspeed do not any allow gas
+        self.cruise_coast_hyst = True
+        
+    if self.cruise_coast_hyst:
+        cruise_coast_intervention = True
+    else:
+        cruise_coast_intervention = False
+        
+    if (CS.cruiseState.speed + .8) < v_ego_pid: # hysteresis to prevent fast toggling of modes when returning to gas allowed
+        self.cruise_coast_hyst = False
+    
+    if cruise_coast_intervention:
+        cruise_force_coast = True # prevent i of winding up (freez i) during phase of coasting (being slower than OP actually wants, errors would sum up)
+        gas_max = 0.
+        prntStai += 10
+    else:
+        cruise_force_coast = False
 
-    output_gb_save = 0. # carlos-ddd
-
-    prntStai = -1
 
     if self.long_control_state == LongCtrlState.off or CS.gasPressed:
       self.update_liveParams(CP)    # carlos-ddd
       self.reset(v_ego_pid)
       output_gb = 0.
-      prntStai = 0
+      prntStai += 1
 
     # tracking objects and driving
     elif self.long_control_state == LongCtrlState.pid:
@@ -151,13 +175,13 @@ class LongControl():
       prevent_overshoot = not CP.stoppingControl and CS.vEgo < 1.5 and v_target_future < 0.7
       deadzone = interp(v_ego_pid, CP.longitudinalTuning.deadzoneBP, CP.longitudinalTuning.deadzoneV)
 
-      output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=(prevent_overshoot or CS.clutchPressed))
+      output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=(prevent_overshoot or CS.clutchPressed or cruise_force_coast))
       output_gb_save = output_gb # carlos-ddd save for later plotting before clipping, limiting, etc to evaluate pid-performance
-      prntStai = 1
+      prntStai += 2
 
       if prevent_overshoot:
         output_gb = min(output_gb, 0.0)
-        prntStai = 2
+        prntStai += 3
 
     # Intention is to stop, switch to a different brake control until we stop
     elif self.long_control_state == LongCtrlState.stopping:
@@ -168,14 +192,14 @@ class LongControl():
 
       self.reset(CS.vEgo)
 
-      prntStai = 3
+      prntStai += 4
 
     # Intention is to move again, release brake fast before handing control to PID
     elif self.long_control_state == LongCtrlState.starting:
-      prntStai = 4
+      prntStai += 5
       if output_gb < -0.2:
         output_gb += STARTING_BRAKE_RATE / RATE
-        prntStai = 5
+        prntStai += 6
       self.reset(CS.vEgo)
 
     self.last_output_gb = output_gb
