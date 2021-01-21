@@ -84,7 +84,6 @@ class LongControl():
     """Reset PID controller and change setpoint"""
     self.pid.reset()
     self.v_pid = v_pid
-    self.cruise_coast_hyst = False # carlos-ddd forced cruise control coasting
 
   def update_liveParams(self, CP):  # carlos-ddd
   
@@ -139,24 +138,13 @@ class LongControl():
     prntStai = 0
     
     # carlos-ddd: Force no gas when cruise-setspeed is smaller (inhibit OP's unwanded deceleration-gas-pressing instead of using drag deceleration of motor)
-    if (CS.cruiseState.speed + 1.3) < v_ego_pid and not self.cruise_coast_hyst: # until +5km/h (~1.3m/s) of cruise-setspeed do not any allow gas
-        self.cruise_coast_hyst = True
-        
-    if self.cruise_coast_hyst:
-        cruise_coast_intervention = True
-    else:
-        cruise_coast_intervention = False
-        
-    if (CS.cruiseState.speed + .8) < v_ego_pid: # hysteresis to prevent fast toggling of modes when returning to gas allowed
-        self.cruise_coast_hyst = False
-    
-    if cruise_coast_intervention:
-        cruise_force_coast = True # prevent i of winding up (freez i) during phase of coasting (being slower than OP actually wants, errors would sum up)
-        gas_max = 0.
-        prntStai += 10
-    else:
-        cruise_force_coast = False
-
+    #if (CS.cruiseState.speed + 2.8) < v_ego_pid : # until +5km/h (~1.3m/s) of cruise-setspeed do not any allow gas
+    #  cruise_force_coast = True # prevent i of winding up (freez i) during phase of coasting (being slower than OP actually wants, errors would sum up)
+    #  gas_max = 0.05
+    #  prntStai += 10
+    #else:
+    #  cruise_force_coast = False
+    cruise_force_coast = False
 
     if self.long_control_state == LongCtrlState.off or CS.gasPressed:
       self.update_liveParams(CP)    # carlos-ddd

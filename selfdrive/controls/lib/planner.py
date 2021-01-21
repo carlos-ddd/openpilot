@@ -25,8 +25,9 @@ AWARENESS_DECEL = -0.2     # car smoothly decel at .2m/s^2 when user is distract
 # MINIMUM acceleration (= deceleration)
 # --------------------
 # make sure these accelerations are smaller than mpc limits
-_A_CRUISE_MIN_V = [-1.0, -.8, -.67, -.5, -.30] # m/s^2
-_A_CRUISE_MIN_BP = [   0., 5.,  10., 20.,  40.]
+#_A_CRUISE_MIN_V = [-1.0, -.8, -.67, -.5, -.30] # m/s^2
+_A_CRUISE_MIN_V =  [-2., -2., -2., -2., -2.] # m/s^2
+_A_CRUISE_MIN_BP = [ 0., 5.,  10., 20.,  40.]
 #                      0 , 18,  36 , 72,   144 km/h
 
 # need fast accel at very low speed for stop and go
