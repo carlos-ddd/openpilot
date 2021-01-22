@@ -26,7 +26,7 @@ AWARENESS_DECEL = -0.2     # car smoothly decel at .2m/s^2 when user is distract
 # --------------------
 # make sure these accelerations are smaller than mpc limits
 #_A_CRUISE_MIN_V = [-1.0, -.8, -.67, -.5, -.30] # m/s^2
-_A_CRUISE_MIN_V = [-1.0, -.8, -.67, -.76, -.5] # m/s^2
+_A_CRUISE_MIN_V = [-1.0, -.8, -.67, -.67, -.5] # m/s^2 carlos-ddd
 _A_CRUISE_MIN_BP = [ 0., 5.,  10., 20.,  40.]
 #                      0 , 18,  36 , 72,   144 km/h
 
@@ -132,6 +132,11 @@ class Planner():
 
     enabled = (long_control_state == LongCtrlState.pid) or (long_control_state == LongCtrlState.stopping)
     following = lead_1.status and lead_1.dRel < 45.0 and lead_1.vLeadK > v_ego and lead_1.aLeadK > 0.0
+    # status "following" is ACTIVE when:
+    # - there is a lead
+    # - distance is <45m
+    # - lead drives faster than me
+    # - lead acceleration is positive (no braking of lead)
 
     # Calculate speed for normal cruise control
     if enabled and not self.first_loop and not sm['carState'].gasPressed:

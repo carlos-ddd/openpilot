@@ -4,6 +4,7 @@ from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.volkswagen import volkswagencan
 from selfdrive.car.volkswagen.values import DBC, CANBUS, NWL, MQB_LDW_MESSAGES, BUTTON_STATES, CarControllerParams, PQ_LDW_MESSAGES
 from opendbc.can.packer import CANPacker
+from common.op_params import opParams
 
 
 class CarController():
@@ -40,6 +41,8 @@ class CarController():
     self.graMsgBusCounterPrev = 0
 
     self.steer_rate_limited = False
+    
+    self.op_params = opParams()     # for live parameter tuning of longitudinal (carlos-ddd)
 
   def update(self, enabled, CS, frame, actuators, visual_alert, audible_alert, leftLaneVisible, rightLaneVisible):
     """ Controls thread """
@@ -133,8 +136,10 @@ class CarController():
     if (frame % P.MOB_STEP == 0) and CS.CP.enableGasInterceptor:
       mobEnabled = self.mobEnabled
       mobPreEnable = self.mobPreEnable
+      mobBrakeScaling = self.op_params.get('PQbrakeScaling')
+      mobBrakeMax = int(self.op_params.get('PQbrakeMax'))
       # TODO make sure we use the full 8190 when calculating braking.
-      apply_brake = actuators.brake * 1200
+      apply_brake = actuators.brake * mobBrakeScaling
       stopping_wish = False
 
       if enabled:
@@ -147,8 +152,8 @@ class CarController():
           elif not mobPreEnable:
             mobPreEnable = True
             apply_brake = 0
-          elif apply_brake > 1199:
-            apply_brake = 1200
+          elif apply_brake > mobBrakeMax:
+            apply_brake = mobBrakeMax
             CS.brake_warning = True
           if CS.currentSpeed < 1.94: #7kph
             stopping_wish = True
@@ -159,6 +164,8 @@ class CarController():
         apply_brake = 0
         mobPreEnable = False
         mobEnabled = False
+      
+      apply_brake = int(apply_brake)
 
       idx = (frame / P.MOB_STEP) % 16
       self.mobPreEnable = mobPreEnable

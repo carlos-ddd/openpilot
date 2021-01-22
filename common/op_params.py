@@ -115,7 +115,9 @@ class opParams:
                         'deadZone_30': Param(.1, VT.number, 'deadzone 30 km/h', live=True),
                         'deadZone_50': Param(.1, VT.number, 'deadzone 50 km/h', live=True),
                         'deadZone_80': Param(.1, VT.number, 'deadzone 80 km/h', live=True),
-                        'deadZone_120': Param(.1, VT.number, 'deadzone 120 km/h', live=True)
+                        'deadZone_120': Param(.1, VT.number, 'deadzone 120 km/h', live=True),
+                        'PQbrakeScaling': Param(1200., VT.number, 'scaling (factor) of braking 0..1 to 0..8190', live=True),
+                        'PQbrakeMax': Param(1200., VT.number, 'maximum for CAN commanded braking 0..8190', live=True)
                         }
 
     self._params_file = '/data/op_params.json'
