@@ -76,9 +76,6 @@ class LongControl():
     self.prntGB = []
     self.prntAtarget = []
     self.prntSta = []
-    
-    self.cruise_coast_hyst = False
-
 
   def reset(self, v_pid):
     """Reset PID controller and change setpoint"""
@@ -136,15 +133,6 @@ class LongControl():
     # carlos-ddd plotting helpers
     output_gb_save = 0.
     prntStai = 0
-    
-    # carlos-ddd: Force no gas when cruise-setspeed is smaller (inhibit OP's unwanded deceleration-gas-pressing instead of using drag deceleration of motor)
-    #if (CS.cruiseState.speed + 2.8) < v_ego_pid : # until +5km/h (~1.3m/s) of cruise-setspeed do not any allow gas
-    #  cruise_force_coast = True # prevent i of winding up (freez i) during phase of coasting (being slower than OP actually wants, errors would sum up)
-    #  gas_max = 0.05
-    #  prntStai += 10
-    #else:
-    #  cruise_force_coast = False
-    cruise_force_coast = False
 
     if self.long_control_state == LongCtrlState.off or CS.gasPressed:
       self.update_liveParams(CP)    # carlos-ddd
@@ -163,7 +151,7 @@ class LongControl():
       prevent_overshoot = not CP.stoppingControl and CS.vEgo < 1.5 and v_target_future < 0.7
       deadzone = interp(v_ego_pid, CP.longitudinalTuning.deadzoneBP, CP.longitudinalTuning.deadzoneV)
 
-      output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=(prevent_overshoot or CS.clutchPressed or cruise_force_coast))
+      output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=(prevent_overshoot or CS.clutchPressed))
       output_gb_save = output_gb # carlos-ddd save for later plotting before clipping, limiting, etc to evaluate pid-performance
       prntStai += 2
 
